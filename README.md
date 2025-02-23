@@ -1,104 +1,126 @@
-# Gemach OnChain AI
+# Gemach AI Protocol Interface
 
-A modern web3 application that combines AI capabilities with blockchain transactions, enabling smart contract interactions and cross-chain operations through an intuitive chat interface.
+Gemach AI is a powerful DeFi protocol interface that enables natural language interactions with various blockchain protocols. It simplifies complex DeFi operations by translating user intentions into executable on-chain actions.
 
-## 🌟 Features
+## Supported Protocols
 
-- **AI-Powered Chat Interface**: Natural language interaction for blockchain operations
-- **Cross-Chain Operations**: Support for multiple blockchain networks and cross-chain transactions
-- **Smart Contract Integration**: Seamless interaction with smart contracts
-- **Wallet Management**: Secure wallet integration and transaction handling
-- **Transaction Monitoring**: Real-time transaction status tracking and history
-- **User Authentication**: Secure login and user management
+### Stryke
+Stryke is a DeFi protocol specializing in advanced options trading, built on Dopex's foundation. It leverages Concentrated Liquidity Automated Market Making (CLAMM) to streamline onchain options trading across multiple chains.
 
-## 🚀 Tech Stack
+**Supported Actions:**
+- `OPEN`: Open option positions
+- `CLOSE`: Close option positions
 
-### Frontend
-- Next.js 13+
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
-- Web3 Libraries
+**Supported Networks:**
+- Arbitrum
+- Base
+- Sonnen
 
-### Backend
-- NestJS
-- Prisma
-- TypeScript
-- LiFi Protocol Integration
-- AI/LLM Integration
+### Symbiosis
+Symbiosis is a decentralized exchange that pools together liquidity from different blockchains. It enables seamless token trading and cross-chain transfers in a single transaction.
 
-## 📦 Installation
+**Supported Actions:**
+- `SWAP`: Token swaps
+- `BRIDGE`: Cross-chain asset transfers
 
-### Prerequisites
-- Node.js 18+
-- pnpm
-- PostgreSQL
+**Supported Networks:**
+- Ethereum
+- BSC
+- Polygon
+- Optimism
+- Arbitrum
+- Base
+- Avalanche
+- Sonnen
 
-### Backend Setup
-```bash
-cd api
-pnpm install
-cp .env.example .env  # Configure your environment variables
-pnpm prisma generate
-pnpm prisma db push
-pnpm run start:dev
-```
+### Transfer
+A basic protocol for transferring assets between addresses.
 
-### Frontend Setup
-```bash
-cd frontend
-pnpm install
-cp .env.local.example .env.local  # Configure your environment variables
-pnpm run dev
-```
+**Supported Actions:**
+- `TRANSFER`: Transfer tokens between addresses
 
-## 🔧 Configuration
+**Supported Networks:**
+- Ethereum
+- BSC
+- Polygon
+- Optimism
+- Arbitrum
+- Base
+- Avalanche
+- Sonnen
 
-### Environment Variables
+## Architecture
 
-#### Backend (.env)
-- Database configuration
-- JWT secrets
-- Blockchain RPC endpoints
-- AI service keys
+The system is built with a modular architecture that includes:
 
-#### Frontend (.env.local)
-- API endpoint
-- Web3 configuration
-- UI settings
+- Protocol Registry: Manages protocol integrations and their supported actions
+- Action Service: Handles action execution and validation
+- Base Chain Service: Provides blockchain interaction capabilities
+- Tool Registry: Manages protocol-specific tools and utilities
 
-## 🛠️ Development
+## Key Features
 
-### Running Tests
-```bash
-# Backend
-cd api
-pnpm run test
+- Natural Language Processing: Convert user intentions into executable actions
+- Multi-Protocol Support: Interact with multiple DeFi protocols
+- Cross-Chain Operations: Execute actions across different blockchain networks
+- Transaction Management: Create, validate, and execute transaction sequences
+- Portfolio Tracking: Monitor balances and positions across protocols
 
-# Frontend
-cd frontend
-pnpm run test
-```
+## Technical Stack
 
-### Building for Production
-```bash
-# Backend
-cd api
-pnpm run build
+- Backend: NestJS
+- Database: PostgreSQL with Prisma ORM
+- Caching: Redis
+- Queue Management: Bull
+- AI Integration: GPT-4
 
-# Frontend
-cd frontend
-pnpm run build
-```
+## System Components
 
-## 🔐 Security
+- Chat System: Handles user interactions and message processing
+- Protocol Registry: Manages protocol integrations
+- Action Service: Executes protocol actions
+- Transaction Service: Handles transaction sequences
+- Tool Registry: Manages protocol-specific tools
 
-For security concerns and vulnerability reports, please refer to our [Security Policy](SECURITY.md).
+## Development
 
-## 📄 License
+The project uses a modular architecture with decorators for protocol and action registration:
+typescript
+@Protocol({
+name: 'protocol_name',
+description: 'Protocol description',
+supportedChainIds: [/ chain IDs /],
+})
+@SupportedActions(/ action types /)
+export class ProtocolService extends BaseProtocol {
+// Implementation
+}
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👥 Contributing
+## Action Types
 
-Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+The system supports various DeFi actions including:
+- BORROW
+- BRIDGE
+- CLAIM
+- CLOSE
+- DEPOSIT
+- LEND
+- LOCK/UNLOCK
+- LONG/SHORT
+- REPAY
+- STAKE/UNSTAKE
+- SWAP
+- TRANSFER
+- LEVERAGE/DELEVERAGE
+- OPEN
+
+## Contributing
+
+Contributions are welcome! To add a new protocol:
+
+1. Create a new service extending `BaseProtocol`
+2. Implement required actions using `@Action` decorator
+3. Register the protocol in `ProtocolsModule`
+4. Add protocol documentation
+5. Submit a pull request

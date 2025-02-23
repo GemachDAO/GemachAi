@@ -1,15 +1,12 @@
-import { TransactionRequest, ContractTransaction } from 'ethers';
+import {  ContractTransaction } from 'ethers';
 import { z } from 'zod';
 
 export const ProtocolActionEnum = z
   .enum([
-    'BORROW',
     'BRIDGE',
-    'REPAY',
     'SWAP',
     'TRANSFER',
     'LEVERAGE',
-    'DELEVERAGE',
     'OPEN',
     'CLOSE'
   ])

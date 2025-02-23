@@ -1,0 +1,38 @@
+flowchart TB
+    %% Actors
+    User((End User))
+    Wallet((Blockchain Wallet))
+    Backend((Backend System))
+
+    subgraph Authentication["Authentication System"]
+        Connect([Connect Wallet])
+        Auth([Authenticate User])
+        Sign([Sign Messages])
+        Verify([Verify Signature])
+        Session([Manage Session])
+        Logout([Logout])
+    end
+
+    %% User Connections
+    User --> Connect
+    User --> Auth
+    User --> Logout
+
+    %% Wallet Connections
+    Wallet --> Sign
+    
+    %% Backend Connections
+    Backend --> Verify
+    Backend --> Session
+
+    %% Include Relationships
+    Connect -.-> Auth
+    Auth -.-> Sign
+    Sign -.-> Verify
+    Verify -.-> Session
+
+    %% Styling
+    classDef actor fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef usecase fill:#bbf,stroke:#333,stroke-width:1px;
+    class User,Wallet,Backend actor;
+    class Connect,Auth,Sign,Verify,Session,Logout usecase; 

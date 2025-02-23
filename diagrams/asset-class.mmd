@@ -1,0 +1,69 @@
+classDiagram
+    class Token {
+        +string address
+        +string symbol
+        +string name
+        +number decimals
+        +string logoURI
+        +boolean isNative
+        +getPrice()
+        +getBalance(address)
+    }
+
+    class TokenBalance {
+        +string tokenAddress
+        +string walletAddress
+        +string amount
+        +number chainId
+        +number usdValue
+        +Date lastUpdated
+        +refresh()
+        +convert(decimals)
+    }
+
+    class Portfolio {
+        +string userId
+        +TokenBalance[] balances
+        +object totalValue
+        +Date lastUpdated
+        +updateBalances()
+        +calculateTotal()
+    }
+
+    class ChainMetadata {
+        +string key
+        +string name
+        +number id
+        +string explorerUrl
+        +Token nativeToken
+        +validateAddress(address)
+        +getExplorerLink(hash)
+    }
+
+    class BalancesService {
+        +getBalances(address)
+        +getTokenBalance(address, token)
+        +trackToken(address, token)
+        +refreshBalances(address)
+    }
+
+    class TokensService {
+        +getToken(address, chainId)
+        +listTokens(chainId)
+        +validateToken(token)
+        +getPriceData(token)
+    }
+
+    class PriceService {
+        +getPrice(token)
+        +getPriceHistory(token)
+        +convertAmount(amount, from, to)
+    }
+
+    Token "1" -- "*" TokenBalance : tracked by
+    TokenBalance "*" -- "1" Portfolio : belongs to
+    ChainMetadata "1" -- "*" Token : contains
+    BalancesService -- TokenBalance : manages
+    TokensService -- Token : manages
+    PriceService -- Token : prices
+    Portfolio -- BalancesService : uses 

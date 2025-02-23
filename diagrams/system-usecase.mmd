@@ -1,0 +1,92 @@
+graph TB
+    %% Actors with stick figure representation
+    User((<actor>User</actor>))
+    AI((<actor>GPT4 Agent</actor>))
+    Wallet((<actor>Blockchain Wallet</actor>))
+    Protocols((<actor>DeFi Protocols</actor>))
+
+    subgraph Gemach["Gemach AI System"]
+        %% Authentication
+        Auth([Authenticate with Wallet])
+        Sign([Sign Messages])
+        
+        %% Chat Operations
+        SendPrompt([Send Prompts])
+        ViewHistory([View Chat History])
+        ReceiveResp([Receive AI Responses])
+        
+        %% Transaction Management
+        CreateTx([Create Transactions])
+        ValidateTx([Validate Transactions])
+        ApproveTx([Approve Transactions])
+        ExecuteTx([Execute Transactions])
+        MonitorTx([Monitor Status])
+        
+        %% Asset Management
+        CheckBalance([Check Token Balances])
+        TrackPortfolio([Track Portfolio])
+        
+        %% Protocol Operations
+        ProcessProtocol([Process Protocol Actions])
+        Swap([Perform Token Swaps])
+        Bridge([Bridge Assets])
+        Lending([Lend/Borrow Assets])
+        Stake([Stake Tokens])
+        Leverage([Leverage Positions])
+        Deleverage([Deleverage Positions])
+    end
+
+    %% User Connections
+    User --> Auth
+    User --> SendPrompt
+    User --> ViewHistory
+    User --> ApproveTx
+    User --> CheckBalance
+    User --> TrackPortfolio
+
+    %% AI Agent Connections
+    AI --> ReceiveResp
+    AI --> CreateTx
+    AI --> ValidateTx
+    AI --> ProcessProtocol
+
+    %% Wallet Connections
+    Wallet --> Sign
+    Wallet --> ExecuteTx
+    Wallet --> CheckBalance
+
+    %% Protocol Connections
+    Protocols --> Swap
+    Protocols --> Bridge
+    Protocols --> Lending
+    Protocols --> Stake
+    Protocols --> Leverage
+    Protocols --> Deleverage
+
+    %% Include Relationships
+    Auth -.-> Sign
+    SendPrompt -.-> ReceiveResp
+    CreateTx -.-> ValidateTx
+    ApproveTx -.-> ExecuteTx
+    ExecuteTx -.-> MonitorTx
+
+    %% Extend Relationships
+    CheckBalance -.-> TrackPortfolio
+    ProcessProtocol -.-> Swap
+    ProcessProtocol -.-> Bridge
+    ProcessProtocol -.-> Lending
+    ProcessProtocol -.-> Stake
+    ProcessProtocol -.-> Leverage
+    ProcessProtocol -.-> Deleverage
+
+    %% Dependencies
+    Swap --> CheckBalance
+    Bridge --> CheckBalance
+    Lending --> CheckBalance
+    Stake --> CheckBalance
+    Leverage --> CheckBalance
+    Deleverage --> CheckBalance
+
+    %% Styling
+    classDef usecase fill:#bbf,stroke:#333,stroke-width:1px;
+    class Auth,Sign,SendPrompt,ViewHistory,ReceiveResp,CreateTx,ValidateTx,ApproveTx,ExecuteTx,MonitorTx,CheckBalance,TrackPortfolio,ProcessProtocol,Swap,Bridge,Lending,Stake,Leverage,Deleverage usecase; 

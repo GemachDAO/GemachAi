@@ -1,0 +1,114 @@
+sequenceDiagram
+    actor User
+    participant Frontend
+    participant Backend
+    participant GPT4
+    participant PromptParser
+    participant ProtocolRegistry
+    participant BaseChain
+    participant Protocols
+    participant Blockchain
+
+    activate Frontend
+    User->>Frontend: Send prompt message
+    
+    alt Not Authenticated
+        Frontend-->>User: Show Auth Error
+        User->>Frontend: Authenticate First
+    else Authenticated
+        activate Backend
+        Frontend->>Backend: POST /chat/stream
+        Backend->>Backend: Generate system prompt
+        
+        activate GPT4
+        Backend->>GPT4: Stream conversation with tools
+        
+        rect rgb(200, 200, 255)
+            Note right of GPT4: Tool Execution Phase
+            
+            alt Tool Execution Required
+                GPT4->>PromptParser: Parse user intent
+                activate PromptParser
+                
+                PromptParser->>ProtocolRegistry: Get protocol for action
+                activate ProtocolRegistry
+                
+                alt Protocol Found
+                    ProtocolRegistry->>Protocols: Get action schema
+                    activate Protocols
+                    Protocols-->>ProtocolRegistry: Return action parameters
+                    deactivate Protocols
+                    
+                    ProtocolRegistry-->>PromptParser: Return protocol action
+                    
+                    PromptParser->>BaseChain: Validate transaction
+                    activate BaseChain
+                    BaseChain-->>PromptParser: Transaction valid
+                    deactivate BaseChain
+                    
+                    PromptParser-->>GPT4: Return parsed actions
+                    
+                    GPT4->>Backend: Build transaction sequence
+                    
+                    alt Transaction Build Success
+                        Backend->>Backend: Generate transaction sequence
+                    else Transaction Build Error
+                        Backend-->>GPT4: Build Error
+                        GPT4-->>Backend: Handle Error
+                        Backend-->>Frontend: Show Transaction Error
+                    end
+                    
+                else Protocol Not Found
+                    ProtocolRegistry-->>PromptParser: Protocol not found
+                    PromptParser-->>GPT4: Invalid Action
+                    GPT4-->>Backend: Request Clarification
+                    Backend-->>Frontend: Ask User for Clarification
+                end
+                deactivate ProtocolRegistry
+                deactivate PromptParser
+                
+            else No Tools Required
+                GPT4-->>Backend: Direct Response
+            end
+        end
+        deactivate GPT4
+        
+        Backend-->>Frontend: Stream assistant response
+        Frontend-->>User: Display response
+
+        alt Transaction Required
+            rect rgb(200, 255, 200)
+                Note right of User: Transaction Execution Phase
+                
+                alt User Rejects Transaction
+                    User->>Frontend: Reject transaction
+                    Frontend-->>User: Cancel Transaction Flow
+                else User Approves Transaction
+                    User->>Frontend: Approve transaction
+                    Frontend->>Backend: POST /transactions/sequence/execute
+                    
+                    activate Blockchain
+                    Backend->>Blockchain: Submit transaction
+                    
+                    alt Transaction Success
+                        Blockchain-->>Backend: Transaction result
+                        Backend-->>Frontend: Stream execution status
+                        Frontend-->>User: Show transaction status
+                        
+                        Backend->>BaseChain: Update token balances
+                        activate BaseChain
+                        BaseChain-->>Backend: New balances
+                        deactivate BaseChain
+                        
+                    else Transaction Failed
+                        Blockchain-->>Backend: Transaction Error
+                        Backend-->>Frontend: Show Transaction Failed
+                        Frontend-->>User: Display Error Details
+                    end
+                    deactivate Blockchain
+                end
+            end
+        end
+        deactivate Backend
+    end
+    deactivate Frontend 

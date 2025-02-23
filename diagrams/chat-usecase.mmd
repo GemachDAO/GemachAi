@@ -1,0 +1,48 @@
+graph TB
+    %% Actors with stick figure representation
+    User((<actor>User</actor>))
+    AI((<actor>AI Agent</actor>))
+
+    subgraph Chat["Chat System"]
+        %% Chat Operations
+        StartChat([Start New Chat])
+        SendMessage([Send Message])
+        ViewHistory([View Chat History])
+        ReceiveResponse([Receive AI Response])
+        
+        %% Tool Operations
+        ExecuteTool([Execute Tool])
+        ValidateTool([Validate Tool])
+        ProcessResult([Process Tool Result])
+        
+        %% Context Management
+        ManageContext([Manage Context])
+        UpdateContext([Update Context])
+        ValidateContext([Validate Context])
+    end
+
+    %% User Connections
+    User --> StartChat
+    User --> SendMessage
+    User --> ViewHistory
+
+    %% AI Connections
+    AI --> ReceiveResponse
+    AI --> ExecuteTool
+    AI --> ManageContext
+
+    %% Include Relationships
+    SendMessage -.-> ManageContext
+    ExecuteTool -.-> ValidateTool
+    ValidateTool -.-> ProcessResult
+    ManageContext -.-> UpdateContext
+    UpdateContext -.-> ValidateContext
+
+    %% Extend Relationships
+    StartChat -.-> SendMessage
+    ReceiveResponse -.-> ExecuteTool
+    ProcessResult -.-> ReceiveResponse
+
+    %% Styling
+    classDef usecase fill:#bbf,stroke:#333,stroke-width:1px;
+    class StartChat,SendMessage,ViewHistory,ReceiveResponse,ExecuteTool,ValidateTool,ProcessResult,ManageContext,UpdateContext,ValidateContext usecase; 

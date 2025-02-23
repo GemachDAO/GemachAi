@@ -1,0 +1,197 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Define the Plan model
+model Plan {
+  id             String @id @default(uuid())
+  name           String @default("free")
+  description    String @default("Build and deploy onchain AI agents")
+  requiredTokens Int    @default(1000000)
+  entitlements   Json
+}
+
+// Define the User model
+model User {
+  id                  String           @id @default(uuid())
+  address             String           @unique
+  email               String?          @unique
+  isSuperuser         Boolean          @default(false)
+  holdingTokenBalance Int              @default(0)
+  walletSetId         String?
+  wallets             Wallet[]
+  chats               Chat[]
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  documents           Document[]
+  suggestions         Suggestion[]
+  actions             ActionSequence[]
+  evmWalletAddress    String?
+  evmWalletId         String?
+}
+
+// Define the Wallet model
+model Wallet {
+  id               String    @id @default(uuid())
+  address          String
+  blockchain       String // Use enum if you have predefined blockchains
+  walletSetId      String
+  createDate       DateTime?
+  initialPublicKey String?
+  custodyType      String?
+  accountType      String?
+  name             String?
+  refId            String?
+  state            String?
+  updateDate       DateTime?
+  userId           String    @map("user_id") // Foreign key
+  user             User      @relation(fields: [userId], references: [id])
+}
+
+enum ChatVisibility {
+  private
+  public
+}
+
+// Define the Session model
+model Chat {
+  id         String         @id @default(uuid())
+  userId     String         @map("user_id") // Foreign key
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  title      String
+  messages   Message[]
+  visibility ChatVisibility @default(private)
+}
+
+// Define the Message model
+enum MessageRole {
+  system
+  user
+  assistant
+  data
+}
+
+model Message {
+  id              String      @id @default(uuid())
+  role            MessageRole
+  content         String
+  createdAt       DateTime    @default(now())
+  vote            Vote?
+  chat            Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  chatId          String
+  toolInvocations Json?
+  annotations     Json?
+  toolCalls       Json?
+}
+
+model Vote {
+  id        String  @id @default(uuid())
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  messageId String  @unique // Foreign key
+  isUpvoted Boolean @default(false)
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  title     String
+  content   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+}
+
+model Suggestion {
+  id                String   @id @default(uuid())
+  createdAt         DateTime @default(now())
+  documentId        String
+  documentCreatedAt DateTime
+  originalText      String
+  suggestedText     String
+  description       String
+  isResolved        Boolean  @default(false)
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+enum ActionType {
+  BORROW
+  BRIDGE
+  CLAIM
+  CLOSE
+  DEPOSIT
+  LEND
+  LOCK
+  LONG
+  REPAY
+  SHORT
+  STAKE
+  SWAP
+  UNLOCK
+  UNSTAKE
+  VOTE
+  WITHDRAW
+  TRANSFER
+  FULL_REPAY
+  REMOVE_COLLATERAL
+  ADD_COLLATERAL
+  LEVERAGE
+  DELEVERAGE
+  OPEN
+}
+
+enum ActionStatus {
+  SENT
+  CONFIRMED
+  FAILED
+  QUEUED
+  CANCELLED
+  UNSIGNED
+  PENDING
+}
+
+// Define the Action model
+model Action {
+  id           String       @id @default(uuid())
+  description  String?
+  status       ActionStatus // TransactionStatus
+  protocol     String? // ProtocolName
+  chain        Json
+  actionArgs   Json // Array of {label, paramType, value}
+  conditions   Json?
+  txHash       String?
+  action       ActionType // ProtocolAction
+  error        Json? // {message: string}
+  transactions Json[] // Array of ActionTransaction
+  warningMessages String[]
+  sequence   ActionSequence @relation(fields: [sequenceId], references: [id])
+  sequenceId String
+}
+
+enum SequenceStatus {
+  PENDING
+  EXECUTED
+  PARTIAL_FAILURE
+  FAILURE
+}
+
+// Define the ActionSequence model
+model ActionSequence {
+  id        String   @id @default(uuid())
+  actions   Action[]
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}

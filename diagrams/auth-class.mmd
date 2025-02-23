@@ -1,0 +1,59 @@
+classDiagram
+    class User {
+        +string id
+        +string address
+        +string email
+        +boolean isSuperuser
+        +number holdingTokenBalance
+        +string walletSetId
+        +Date createdAt
+        +Date updatedAt
+        +string evmWalletAddress
+        +string solanaWalletAddress
+    }
+
+    class Session {
+        +string id
+        +string userId
+        +string jwt
+        +Date expiresAt
+        +Date createdAt
+        +boolean isValid
+        +validateSession()
+        +refreshSession()
+    }
+
+    class AuthService {
+        +verifySignature(payload)
+        +generateJWT(payload)
+        +verifyJWT(token)
+        +getLoginPayload(address)
+        +logout()
+    }
+
+    class WalletConnection {
+        +string address
+        +string chainId
+        +string provider
+        +connect()
+        +disconnect()
+        +signMessage(message)
+        +getBalance()
+    }
+
+    class JwtAuthGuard {
+        +canActivate(context)
+        +handleRequest(err, user)
+    }
+
+    class TokenHoldingsGuard {
+        +canActivate(context)
+        +validateHoldings(user)
+    }
+
+    User "1" -- "1" Session : has
+    User "1" -- "1..*" WalletConnection : owns
+    AuthService -- Session : manages
+    AuthService -- WalletConnection : uses
+    JwtAuthGuard -- AuthService : uses
+    TokenHoldingsGuard -- User : validates 

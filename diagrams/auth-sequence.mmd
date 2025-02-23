@@ -1,0 +1,69 @@
+sequenceDiagram
+    actor User
+    participant Frontend
+    participant ThirdwebAuth
+    participant Backend
+    participant Blockchain
+
+    activate Frontend
+    User->>Frontend: Click Connect Wallet
+    Frontend->>ThirdwebAuth: Initialize ConnectButton
+    activate ThirdwebAuth
+    
+    ThirdwebAuth->>Blockchain: Request Wallet Connection
+    activate Blockchain
+    
+    alt No Wallet Extension
+        Blockchain-->>User: Error: Install Wallet
+        User->>User: Install Wallet Extension
+        User->>Frontend: Retry Connection
+    else Wallet Found
+        Blockchain-->>User: Prompt to Connect Wallet
+        
+        alt User Rejects
+            User->>Blockchain: Reject Connection
+            Blockchain-->>ThirdwebAuth: Connection Rejected
+            ThirdwebAuth-->>Frontend: Connection Failed
+            Frontend-->>User: Show Connection Error
+        else User Accepts
+            User->>Blockchain: Approve Connection
+            Blockchain-->>ThirdwebAuth: Return Wallet Address
+            
+            activate Backend
+            ThirdwebAuth->>Backend: GET /auth/get-login-payload
+            Backend-->>ThirdwebAuth: Return Login Payload
+            
+            ThirdwebAuth->>Blockchain: Request Message Signing
+            Blockchain-->>User: Prompt to Sign Message
+            
+            alt User Rejects Signing
+                User->>Blockchain: Reject Signature
+                Blockchain-->>ThirdwebAuth: Signature Rejected
+                ThirdwebAuth-->>Frontend: Authentication Failed
+                Frontend-->>User: Show Signature Error
+            else User Accepts Signing
+                User->>Blockchain: Approve Signature
+                Blockchain-->>ThirdwebAuth: Return Signed Message
+                
+                ThirdwebAuth->>Backend: POST /auth/login with Signature
+                
+                alt Invalid Signature
+                    Backend->>Backend: Verify Signature
+                    Backend-->>ThirdwebAuth: Authentication Failed
+                    ThirdwebAuth-->>Frontend: Invalid Signature
+                    Frontend-->>User: Show Auth Error
+                else Valid Signature
+                    Backend->>Backend: Verify Signature
+                    Backend->>Backend: Generate JWT Token
+                    Backend-->>Frontend: Return JWT Token & User Data
+                    
+                    Frontend->>Frontend: Store Session
+                    Frontend-->>User: Show Connected State
+                end
+            end
+            deactivate Backend
+        end
+    end
+    deactivate Blockchain
+    deactivate ThirdwebAuth
+    deactivate Frontend 

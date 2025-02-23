@@ -1,0 +1,50 @@
+flowchart TB
+    %% Actors
+    User((End User))
+    AI((GPT4 Agent))
+    Wallet((Blockchain Wallet))
+    Blockchain((Blockchain))
+
+    subgraph Transactions["Transaction System"]
+        CreateTx([Create Transactions])
+        ValidateTx([Validate Transactions])
+        ApproveTx([Approve Transactions])
+        ExecuteTx([Execute Transactions])
+        MonitorTx([Monitor Status])
+        EstimateGas([Estimate Gas])
+        HandleError([Handle Errors])
+        ViewHistory([View Transaction History])
+    end
+
+    %% User Connections
+    User --> ApproveTx
+    User --> ViewHistory
+    User --> MonitorTx
+
+    %% AI Connections
+    AI --> CreateTx
+    AI --> ValidateTx
+    AI --> EstimateGas
+
+    %% Wallet Connections
+    Wallet --> ExecuteTx
+    Wallet --> EstimateGas
+
+    %% Blockchain Connections
+    Blockchain --> MonitorTx
+    Blockchain --> HandleError
+
+    %% Include Relationships
+    CreateTx -.-> ValidateTx
+    ValidateTx -.-> EstimateGas
+    EstimateGas -.-> ApproveTx
+    ApproveTx -.-> ExecuteTx
+    ExecuteTx -.-> MonitorTx
+    MonitorTx -.-> HandleError
+    ExecuteTx -.-> ViewHistory
+
+    %% Styling
+    classDef actor fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef usecase fill:#bbf,stroke:#333,stroke-width:1px;
+    class User,AI,Wallet,Blockchain actor;
+    class CreateTx,ValidateTx,ApproveTx,ExecuteTx,MonitorTx,EstimateGas,HandleError,ViewHistory usecase; 

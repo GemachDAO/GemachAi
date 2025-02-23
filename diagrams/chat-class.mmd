@@ -1,0 +1,124 @@
+classDiagram
+    class Chat {
+        +string id
+        +string title
+        +User user
+        +Message[] messages
+        +Date createdAt
+        +Date updatedAt
+        +addMessage()
+        +updateTitle()
+    }
+
+    class Message {
+        +string id
+        +string chatId
+        +string role
+        +string content
+        +ToolInvocation[] toolInvocations
+        +ToolCall[] toolCalls
+        +Date createdAt
+    }
+
+    class ToolInvocation {
+        +string toolCallId
+        +string name
+        +object args
+        +string state
+        +object result
+    }
+
+    class ToolCall {
+        +string id
+        +string type
+        +string name
+        +object args
+        +execute()
+    }
+
+    class PromptService {
+        +generateSystemPrompt(address)
+        +generateUserPrompt(message)
+        +sanitizePrompt(prompt)
+    }
+
+    class PromptParserService {
+        +parseActions(actions, context)
+        +validateAction(action)
+        +generateParameters(action)
+    }
+
+    class StreamProcessingService {
+        +handleStream(params)
+        +processToolCalls(calls)
+        +streamResponse(response)
+    }
+
+    class ChatsService {
+        +createChat(data)
+        +getChat(id)
+        +updateChat(id, data)
+        +deleteChat(id)
+        +listChats(userId)
+    }
+
+    class BaseProtocol {
+        +provider: JsonRpcProvider
+        +chainId: number
+        +validateTransaction()
+        +estimateGas()
+        +buildTransaction()
+    }
+
+    class ProtocolRegistryService {
+        -static services: BaseProtocol[]
+        -static actionRegistry: ActionRegistry
+        +registerService(service)
+        +getProtocol(name)
+        +getServiceForAction(actionId)
+        +getAllServices()
+    }
+
+    class CurveService {
+        +onModuleInit()
+        +getNetworkName()
+        +borrow()
+        +repay()
+        +leverage()
+        +deleverage()
+        +listLendingMarkets()
+    }
+
+    class BaseChainService {
+        +provider: JsonRpcProvider
+        +getTokenBalance()
+        +getTokenAllowance()
+        +approveToken()
+        +getTransactionInfo()
+        +getBlockInfo()
+    }
+
+    class BalancesService {
+        +getTokenBalances()
+        +getPortfolioValue()
+        +trackBalanceChanges()
+    }
+
+    class TokensService {
+        +getTokenInfo()
+        +listSupportedTokens()
+        +validateTokenAddress()
+    }
+
+    Chat "1" -- "*" Message : contains
+    Message "1" -- "*" ToolInvocation : has
+    Message "1" -- "*" ToolCall : has
+    ChatsService -- Chat : manages
+    PromptService -- Message : generates
+    PromptParserService -- ToolCall : parses
+    StreamProcessingService -- Message : processes
+    BaseProtocol <|-- CurveService : extends
+    ProtocolRegistryService -- BaseProtocol : registers
+    BaseChainService -- BaseProtocol : uses
+    BalancesService -- BaseChainService : uses
+    TokensService -- BaseChainService : uses 

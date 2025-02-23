@@ -1,0 +1,77 @@
+classDiagram
+    class ActionSequence {
+        +string id
+        +Action[] actions
+        +string userId
+        +string messageId
+        +Date createdAt
+        +string status
+        +execute()
+        +validate()
+    }
+
+    class Action {
+        +string description
+        +string protocol
+        +string action
+        +number chainId
+        +object params
+        +Transaction[] transactions
+        +validateParams()
+        +buildTransactions()
+    }
+
+    class Transaction {
+        +string id
+        +string status
+        +string type
+        +number chainId
+        +object actionArgs
+        +string txHash
+        +string error
+        +object transactionObject
+        +object estimateGasResult
+        +execute()
+        +estimate()
+    }
+
+    class BaseChainService {
+        +JsonRpcProvider provider
+        +switchNetwork(chainId)
+        +getGasPrice()
+        +estimateGas(tx)
+        +sendTransaction(tx)
+        +getTransactionReceipt(hash)
+    }
+
+    class ProtocolRegistryService {
+        +registerProtocol(protocol)
+        +getProtocol(name)
+        +getActionSchema(action, protocol)
+        +validateAction(action)
+    }
+
+    class BaseProtocol {
+        +string name
+        +object schemas
+        +object actions
+        +validateAction(action)
+        +executeAction(action)
+        +estimateAction(action)
+    }
+
+    class TransactionService {
+        +createSequence(data)
+        +executeSequence(id)
+        +getSequence(id)
+        +updateSequence(id, data)
+        +monitorTransaction(hash)
+    }
+
+    ActionSequence "1" -- "*" Action : contains
+    Action "1" -- "*" Transaction : generates
+    TransactionService -- ActionSequence : manages
+    BaseChainService -- Transaction : executes
+    ProtocolRegistryService -- BaseProtocol : registers
+    BaseProtocol -- Action : validates
+    Action -- ProtocolRegistryService : uses 

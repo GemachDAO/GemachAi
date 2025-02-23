@@ -1,0 +1,59 @@
+flowchart TB
+    %% Actors
+    User((End User))
+    AI((GPT4 Agent))
+    Protocols((DeFi Protocols))
+    Blockchain((Blockchain))
+
+    subgraph DeFi["Protocol Operations"]
+        ProcessProtocol([Process Protocol Actions])
+        Swap([Token Swaps])
+        Bridge([Bridge Assets])
+        Lending([Lending/Borrowing])
+        Stake([Staking])
+        CheckBalance([Check Balances])
+        TrackPortfolio([Track Portfolio])
+        ValidateParams([Validate Parameters])
+        EstimateOutput([Estimate Output])
+    end
+
+    %% User Connections
+    User --> CheckBalance
+    User --> TrackPortfolio
+
+    %% AI Connections
+    AI --> ProcessProtocol
+    AI --> ValidateParams
+    AI --> EstimateOutput
+
+    %% Protocol Connections
+    Protocols --> Swap
+    Protocols --> Bridge
+    Protocols --> Lending
+    Protocols --> Stake
+
+    %% Blockchain Connections
+    Blockchain --> CheckBalance
+
+    %% Include Relationships
+    ProcessProtocol -.-> ValidateParams
+    ValidateParams -.-> EstimateOutput
+    
+    %% Extend Relationships
+    ProcessProtocol -.-> Swap
+    ProcessProtocol -.-> Bridge
+    ProcessProtocol -.-> Lending
+    ProcessProtocol -.-> Stake
+
+    %% Dependencies
+    Swap --> CheckBalance
+    Bridge --> CheckBalance
+    Lending --> CheckBalance
+    Stake --> CheckBalance
+    CheckBalance --> TrackPortfolio
+
+    %% Styling
+    classDef actor fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef usecase fill:#bbf,stroke:#333,stroke-width:1px;
+    class User,AI,Protocols,Blockchain actor;
+    class ProcessProtocol,Swap,Bridge,Lending,Stake,CheckBalance,TrackPortfolio,ValidateParams,EstimateOutput usecase; 

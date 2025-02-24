@@ -1,7 +1,6 @@
 import { initiateDeveloperControlledWalletsClient } from '@circle-fin/developer-controlled-wallets';
 import { Injectable, } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../db/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Queue, } from 'bullmq';
 
@@ -9,11 +8,9 @@ import { Queue, } from 'bullmq';
 import {
   Wallet,
 } from '@circle-fin/developer-controlled-wallets/dist/types/clients/developer-controlled-wallets';
-import { RedisStoreService } from '../utils/redis-store.service';
 import { BaseChainService } from '../protocols/base/base-chain.service';
 import { TransactionsService } from '../transactions/transactions.service';
 import { InjectQueue } from '@nestjs/bullmq';
-import { ChatsService } from '../chat/chats.service';
 import { CustomLogger, Logger } from 'src/libs/logging';
 // create a type for the client
 type Client = ReturnType<typeof initiateDeveloperControlledWalletsClient>;
@@ -27,10 +24,7 @@ export class WalletsService {
   constructor(
     private configService: ConfigService,
     @Logger('WalletsService') private logger: CustomLogger,
-    private readonly redisStoreService: RedisStoreService,
-    private readonly prismaService: PrismaService,
     private readonly transactionsService: TransactionsService,
-    private readonly chatsService: ChatsService,
     @InjectQueue('transaction-job') private transactionJobQueue: Queue,
     private readonly baseChainService: BaseChainService,
   ) {
@@ -108,7 +102,7 @@ export class WalletsService {
     }
   }
 
-  private async executeAction(
+   async executeAction( 
     action: Action,
     walletId: string,
   ): Promise<Action> {
@@ -144,6 +138,7 @@ export class WalletsService {
         console.log('preparedTx', preparedTx);
         console.log('feeEstimationError', estimationError);
 
+
         if (estimationError) {
           const failedTx = {
             ...transaction,
@@ -160,6 +155,8 @@ export class WalletsService {
           );
           return updatedAction;
         }
+
+        // return action
 
         // Sign and send transaction
         const signedTxResponse = await this.client.signTransaction({

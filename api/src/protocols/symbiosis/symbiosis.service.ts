@@ -56,8 +56,11 @@ export class SymbiosisService extends BaseProtocol {
         console.log("getSwapCallData ", JSON.stringify(data, null, 2))
         try {
             const request = await axios.post('https://api.symbiosis.finance/crosschain/v1/swap', data)
-            return request.data
+            const requestData = request.data
+            console.log("requestData ", requestData)
+            return requestData
         } catch (error) {
+            console.log("getSwapCallData ", error)
 
             if (isAxiosError(error)) {
                 console.log("Error  ", error.response.data)
@@ -127,7 +130,8 @@ export class SymbiosisService extends BaseProtocol {
             { ...tx, from: userAddress },
             approveTo,
             tokenInData,
-            amountIn
+            amountIn,
+            chainId
         );
 
         return {
@@ -228,7 +232,7 @@ export class SymbiosisService extends BaseProtocol {
         console.log("approveTo ", approveTo)
         console.log("type ", type)
         console.log("tokenAmountOut ", tokenAmountOut)
-        const transactions = await this.getStepTransactionData({ ...tx, from: userAddress }, approveTo, tokenInData, amount)
+        const transactions = await this.getStepTransactionData({ ...tx, from: userAddress }, approveTo, tokenInData, amount, fromChainId)
         console.log("Transactions ", transactions)
 
         return {
@@ -293,8 +297,10 @@ export class SymbiosisService extends BaseProtocol {
     }
 
 
-    async getStepTransactionData(tx: TransactionRequestWithGas, approveTo: string, tokenIn: Token, amountIn: string): Promise<ActionTransaction[]> {
+    async getStepTransactionData(tx: TransactionRequestWithGas, approveTo: string, tokenIn: Token, amountIn: string, chainId: number): Promise<ActionTransaction[]> {
         const transactions: ActionTransaction[] = []
+
+        await this.baseChainService.switchNetwork(chainId)
         if (!this.baseChainService.isNullAddress(tokenIn.address)) {
             const hasAllowance = await this.baseChainService.hasAllowance(
                 tokenIn.address,

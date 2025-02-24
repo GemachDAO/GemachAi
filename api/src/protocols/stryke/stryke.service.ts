@@ -33,6 +33,7 @@ import {
 import { BaseChainService } from '../base/base-chain.service';
 import { TokensService } from '../../tokens/tokens.service';
 import { STRYKE_ADDRESSES } from './constants';
+import { WalletsService } from '../../wallets/wallets.service';
 
 
 
@@ -48,18 +49,16 @@ import { STRYKE_ADDRESSES } from './constants';
     ],
 })
 @SupportedActions(ProtocolActionEnum.Enum.OPEN, ProtocolActionEnum.Enum.CLOSE)
-export class StrykeService extends BaseProtocol implements OnModuleInit {
+export class StrykeService extends BaseProtocol   {
     private addresses = STRYKE_ADDRESSES;
     private baseUrl = 'https://api.stryke.xyz';
 
     constructor(
         private readonly baseChainService: BaseChainService,
         private readonly tokensService: TokensService,
+        private readonly walletsService: WalletsService,
     ) {
         super();
-    }
-
-    async onModuleInit() {
     }
 
     async getUserData(address: string,) {
@@ -224,8 +223,8 @@ export class StrykeService extends BaseProtocol implements OnModuleInit {
     )
     async openPosition(params: z.infer<typeof purchaseOptionsSchema>): Promise<Action> {
         try {
-            const { chainId, optionMarket, isCall, amount, targetPrice, userAddress, expiration } = params;
-            const maxDifferenceToUse = params.maxDifference ?? 0.05;
+            const { chainId, optionMarket, isCall, size, targetPrice, userAddress, expiration } = params;
+            const maxDifferenceToUse =  0.1;
 
             const markets = await this.getOptionMarkets({ chainIds: [chainId] });
 
@@ -269,18 +268,16 @@ export class StrykeService extends BaseProtocol implements OnModuleInit {
             const strikeData = strike.strikeData[0]
 
 
-            console.log("strikeData", strikeData)
-            console.log("strike", strike)
 
             const optionLiquidity = strikeData.availableLiquidity;
 
-            if (parseFloat(optionLiquidity) < parseFloat(amount)) {
+            if (parseFloat(optionLiquidity) < parseFloat(size)) {
                 // Find alternative strikes with sufficient liquidity
                 const alternativesWithSufficientLiquidity = strike.alternativeStrikes
-                    ?.filter(s => parseFloat(s.availableLiquidity) >= parseFloat(amount))
+                    ?.filter(s => parseFloat(s.availableLiquidity) >= parseFloat(size))
                     .slice(0, 3); // Get top 3 alternatives
 
-                let errorMessage = `Insufficient liquidity in the ${market.pairName} market for the amount ${amount} ${tokenToUse.symbol}. Available liquidity: ${optionLiquidity} ${tokenToUse.symbol}.`;
+                let errorMessage = `Insufficient liquidity in the ${market.pairName} market for the amount ${size} ${tokenToUse.symbol}. Available liquidity: ${optionLiquidity} ${tokenToUse.symbol}.`;
 
                 if (alternativesWithSufficientLiquidity?.length > 0) {
                     errorMessage += "\n\nAlternative strikes with sufficient liquidity:";
@@ -300,10 +297,11 @@ export class StrykeService extends BaseProtocol implements OnModuleInit {
                     `This difference may affect your expected returns. Take this into account when making your decision.`
                 );
             }
+
             this.baseChainService.switchNetwork(chainId);
             const hasAllowance = await this.baseChainService.hasAllowance(
                 tokenToUse.address,
-                amount,
+                size,
                 userAddress,
                 market.address,
             );
@@ -323,27 +321,27 @@ export class StrykeService extends BaseProtocol implements OnModuleInit {
                     type: 'contractExecution',
                 });
             }
-            console.log("amount ", amount)
+            console.log("amount ", size)
             const quote = await this.getPurchaseQuote({
                 chainId,
                 optionMarket: market.ticker,
                 userAddress,
                 strike: parseFloat(targetPrice),
                 type: isCall ? 'call' : 'put',
-                amount: parseFloat(amount),
+                amount: parseFloat(size),
                 expiration: expiration
             })
 
             const { premium, fees } = quote
 
-            // console.log("premium ", premium)
-            // console.log("fees ", fees)
+            console.log("premium ", premium)
+            console.log("fees ", this.baseChainService.BN(fees,))
 
-            const totalCost = parseFloat(premium) + parseFloat(fees)
-            const totalSize = parseFloat(amount) + totalCost
-            console.log("totalCost ", totalCost, totalCost)
-            console.log("UNIT ", this.baseChainService.parseUnits(amount, tokenDecimals))
-            const amountBn = this.baseChainService.parseUnits(amount, tokenDecimals)
+            const totalCost = this.baseChainService.BN(fees).plus(this.baseChainService.BN(premium))
+            console.log("totalCost ", totalCost.toNumber())
+
+            const amountBn = this.baseChainService.parseUnits(fees, tokenDecimals)
+
             const optionTicks = [
                 {
                     _handler: strikeData.handler.handler,
@@ -351,7 +349,7 @@ export class StrykeService extends BaseProtocol implements OnModuleInit {
                     hook: strikeData.meta.hook,
                     tickLower: strikeData.meta.tickLower,
                     tickUpper: strikeData.meta.tickUpper,
-                    liquidityToUse: amountBn.toString()
+                    liquidityToUse: totalCost.toString()
                 },
             ];
 
@@ -364,13 +362,14 @@ export class StrykeService extends BaseProtocol implements OnModuleInit {
             }
 
             const ttl = this.getExpirationTTL(expiration);
+
             const optionParams = {
                 optionTicks: optionTicks,
                 tickLower: strikeData.meta.tickLower,
                 tickUpper: strikeData.meta.tickUpper,
                 ttl: ttl,
                 isCall: isCall,
-                maxCostAllowance: (amountBn * 2n).toString()
+                maxCostAllowance: totalCost.multipliedBy(2).toString()
             };
             console.log("optionParams", optionParams)
 
@@ -380,14 +379,13 @@ export class StrykeService extends BaseProtocol implements OnModuleInit {
 
             const contract = this.baseChainService.getContract(market.address, IDopexV2OptionMarketV2);
             const tx = await contract.mintOption.populateTransaction(optionParams);
-            console.log("tx ", tx);
             transactions.push({
                 status: 'PENDING',
                 transaction: {
                     to: market.address,
                     from: userAddress,
                     data: tx.data,
-                    value: tx.value,
+                    value: "0",
                     chainId
                 },
                 type: 'contractExecution',
@@ -397,7 +395,7 @@ export class StrykeService extends BaseProtocol implements OnModuleInit {
                 token: tokenToUse.address,
                 chainId
             }, true) as Token;
-            console.log("tokenInfo ", tokenInfo);
+
             const action: Action = {
                 id: uuidv4(),
                 status: 'PENDING',
@@ -419,7 +417,7 @@ export class StrykeService extends BaseProtocol implements OnModuleInit {
                     {
                         label: 'Option Amount',
                         paramType: 'Number',
-                        value: amount,
+                        value: size,
                     },
                     {
                         label: 'Target Price',
@@ -429,7 +427,7 @@ export class StrykeService extends BaseProtocol implements OnModuleInit {
                     {
                         label: 'Total Cost',
                         paramType: 'Number',
-                        value: formatDecimal(this.baseChainService.formatUnits(totalCost, tokenDecimals), 4),
+                        value: formatDecimal(this.baseChainService.formatUnits(totalCost.toString(), tokenDecimals), 4),
                     },
                     {
                         label: 'Premium',
@@ -679,7 +677,6 @@ export class StrykeService extends BaseProtocol implements OnModuleInit {
             const tokenPrice = await this.tokensService.getTokenprice(tokenToUse.address, chainId)
             const expiration = this.getExpirationTTL(params.expiration)
 
-            console.log("tokenPrice ", tokenPrice)
             const url = `${this.baseUrl}/clamm/purchase/quote?chainId=${chainId}&optionMarket=${market.address}&user=${userAddress}&strike=${strike}&markPrice=${tokenPrice}&type=${type}&amount=${amount}&ttl=${expiration}`
             const response = await axios.get<PurchaseQuoteResponse>(url)
             return response.data

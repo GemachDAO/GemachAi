@@ -85,6 +85,7 @@ The system is built with a modular architecture that includes:
 ## Development
 
 The project uses a modular architecture with decorators for protocol and action registration:
+
 ```typescript
 @Protocol({
 name: 'protocol_name',

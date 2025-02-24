@@ -33,7 +33,6 @@ export function formatDecimal(
   } = {}
 ): string {
 
-  console.log("formatinf ", value, decimals, options)
   const { trimZeros = false, minDecimals = 0 } = options;
 
   // Convert to number and handle invalid inputs

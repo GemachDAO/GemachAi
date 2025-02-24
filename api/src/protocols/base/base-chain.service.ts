@@ -75,7 +75,7 @@ export class BaseChainService {
 
   @Tool(
     {
-      name: 'getBlockNumber',
+      name: 'getBlockInfo',
       description: 'Retrieve data within a block on a specific evm chain',
       schema: getBlockInfoSchema
     }

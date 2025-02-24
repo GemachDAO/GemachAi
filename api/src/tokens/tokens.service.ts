@@ -75,10 +75,9 @@ export class TokensService {
     }
 
     let tokenData;
+    const isNativeToken = this.baseChainService.isNullAddress(token)
     // search by address
     if (isAddress) {
-      const isNativeToken = this.baseChainService.isNullAddress(token)
-
       if (isNativeToken) {
         tokenData = await this.coinGeckoClient.coinId({
           id: this.getNativeTokenId(chainId),
@@ -127,7 +126,6 @@ export class TokensService {
 
 
     if (isMetadata) {
-      const isNativeToken = this.baseChainService.isNativetoken(tokenData.symbol)
 
       const addressData = addresses[chainId];
 

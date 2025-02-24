@@ -25,7 +25,6 @@ export function AssetList({ user }: { user: User | undefined }) {
     const { data: balances, isLoading: isBalancesLoading, mutate: mutateBalances } = useSWR<Array<BalanceResponse>>(user ? `/balances/balances/${user.evmWalletAddress}` : null, authFetch ,{
         fallbackData:[]
     })
-    console.log('balances', balances)
     const [walletName, setWalletName] = useState('')
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)

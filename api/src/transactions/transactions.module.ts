@@ -3,7 +3,6 @@ import { TransactionsController } from './transactions.controller';
 import { TransactionsService } from './transactions.service';
 import { PrismaService } from '../db/prisma.service';
 import { BullModule } from '@nestjs/bullmq';
-import { ChatsService } from '../chat/chats.service';
 @Module({
   imports: [
     BullModule.registerQueue({
@@ -12,7 +11,7 @@ import { ChatsService } from '../chat/chats.service';
   ],
 
   controllers: [TransactionsController],
-  providers: [TransactionsService, PrismaService, ChatsService],
+  providers: [TransactionsService, PrismaService, ],
   exports: [TransactionsService],
 })
 export class TransactionsModule {}

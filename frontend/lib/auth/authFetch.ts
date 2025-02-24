@@ -31,7 +31,7 @@ export const authFetch = async (
         'Content-Type': 'application/json',
         'Accept': 'application/json',
     };
-    let response = await fetch(`${serverUrl}${url}`, {
+    const response = await fetch(`${serverUrl}${url}`, {
         ...options,
         headers,
     });

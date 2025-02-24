@@ -48,16 +48,16 @@ export class BalancesService {
       const cachedBalances = await this.redisStoreService.getCached(cacheKey).catch(() => null);
 
       // If we have cached data and it's not too old, return it immediately
-      if (cachedBalances) {
-        // Trigger background refresh if cache is getting stale (over 2 minutes old)
-        const cacheAge = Date.now() - new Date(cachedBalances.updated_at).getTime();
-        if (cacheAge > 120000) {
-          this.refreshBalancesInBackground(params, cacheKey).catch(err =>
-            this.logger.error(`Background refresh failed: ${err.message}`)
-          );
-        }
-        return cachedBalances;
-      }
+      // if (cachedBalances) {
+      //   // Trigger background refresh if cache is getting stale (over 2 minutes old)
+      //   const cacheAge = Date.now() - new Date(cachedBalances.updated_at).getTime();
+      //   if (cacheAge > 120000) {
+      //     this.refreshBalancesInBackground(params, cacheKey).catch(err =>
+      //       this.logger.error(`Background refresh failed: ${err.message}`)
+      //     );
+      //   }
+      //   return cachedBalances;
+      // }
 
       let responseData: any;
       console.log(`Getting balances for ${address} on chain ${chainId}`)
@@ -100,16 +100,18 @@ export class BalancesService {
           quote_currency: "USD",
           updated_at: new Date()
         }
-      } else {
-        const networkName = this.getNetworkName(chainId);
-        const response = await this.goldRushClient.BalanceService.getTokenBalancesForWalletAddress(
-          networkName,
-          address,
-        );
-        if (!response.error) {
-          responseData = response.data;
-        }
       }
+      //  else {
+      //   const networkName = this.getNetworkName(chainId);
+      //   const response = await this.goldRushClient.BalanceService.getTokenBalancesForWalletAddress(
+      //     networkName,
+      //     address,
+      //   );
+      //   console.log("response ", response)
+      //   if (!response.error) {
+      //     responseData = response.data;
+      //   }
+      // }
 
       // Batch process all token prices in parallel
       const tokenPricePromises = responseData.items.map(async (token) => {

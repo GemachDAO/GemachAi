@@ -20,7 +20,6 @@ import { UserInSession } from '../global.entity';
 import { Observable, defer, map, repeat, tap, delay, filter } from 'rxjs';
 import { UsersService } from '../users/users.service';
 import { WalletsService } from '../wallets/wallets.service';
-import { ChatsService } from '../chat/chats.service';
 import { Prisma } from '@prisma/client';
 
 
@@ -30,7 +29,6 @@ export class TransactionsController {
     private transactionsService: TransactionsService,
     private usersService: UsersService,
     private walletsService: WalletsService,
-    private chatsService: ChatsService,
   ) {}
 
   /**

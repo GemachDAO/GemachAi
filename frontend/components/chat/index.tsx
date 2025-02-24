@@ -56,12 +56,14 @@ const Chat = ({
         body: { id, modelId: selectedModelId },
         initialMessages,
         experimental_throttle: 100,
-        onFinish: () => {
+        onFinish: async () => {
+            console.log("onFinish");
             if (currentId !== id) {
                 router.push(`/chat/${id}`);
             }
-            mutateChatList();
-            mutateChatMessages();
+            const messages = await mutateChatMessages();
+            setMessages(messages);
+            await mutateChatList();
         },
         onError: async (error) => {
             console.log("Error in chat", error.name);
@@ -70,6 +72,7 @@ const Chat = ({
         },
     });
 
+    console.log("messages", messages);
 
     return (
         <div className="flex flex-col h-full relative min-w-0 ">

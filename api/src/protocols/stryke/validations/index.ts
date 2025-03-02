@@ -42,8 +42,8 @@ export const purchaseOptionsSchema = z.object({
   chainId: z.number().describe('Chain ID of the network'),
   optionMarket: z.string().describe('Market pair in format TOKENx/TOKENy '),
   isCall: z.boolean().describe('Whether the purchase is for a call or put option'),
-  expiration: z.enum(['1h','2h', '6h', '2d', '6d', '12h', '24h', '1w']).describe('Expiration time for the option'),
-  size: z.string().describe('size of options to purchase'),
+  expiration: z.enum(['1h', '2d', '6d', '12h', '24h', '1w']).describe('Expiration time for the option'),
+  amount: z.string().describe('Amount of options to purchase'),
   targetPrice: z.string().describe('Target price for the option'),
   maxDifference: z.number().describe('Maximum allowed difference from target price').optional().default(0.05).nullable(),
   userAddress: z.string().describe('User address'),
@@ -56,7 +56,7 @@ export const getPurchaseQuoteSchema = z.object({
   strike: z.number().describe('Strike price of the option'),
   type: z.enum(['call', 'put']).describe('Type of option'),
   amount: z.number().describe('Amount of options to purchase'),
-  expiration: z.enum(['1h','2h', '6h', '2d', '6d', '12h', '24h', '1w']).describe('Expiration time for the option')
+  expiration: z.enum(['1h', '2d', '6d', '12h', '24h', '1w']).describe('Expiration time for the option')
 });
 
 export const closePositionSchema = z.object({

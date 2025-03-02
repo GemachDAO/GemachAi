@@ -13,6 +13,7 @@ export default (isTest = false) => {
     FRAXTAL_RPC_URL,
     BASE_RPC_URL,
     BINANCE_RPC_URL,
+    NIBIRU_RPC_URL,
     CIRCLE_API_KEY_MAINNET,
     CIRCLE_ENTITY_SECRET,
     THIRDWEB_SECRET_KEY,
@@ -26,7 +27,22 @@ export default (isTest = false) => {
     REDIS_DB,
     REDIS_USERNAME,
     JWT_SECRET,
+    SEARCH_ENGINE_ID,
+    GOOGLE_API_KEY
   } = process.env;
+
+  if (!NIBIRU_RPC_URL) {
+    console.error('NIBIRU_RPC_URL is not set');
+    process.exit(1);
+  }
+  if (!SEARCH_ENGINE_ID) {
+    console.error('SEARCH_ENGINE_ID is not set');
+    process.exit(1);
+  }
+  if (!GOOGLE_API_KEY) {
+    console.error('GOOGLE_API_KEY is not set');
+    process.exit(1);
+  }
   if (!JWT_SECRET) {
     console.error('JWT_SECRET is not set');
     process.exit(1);
@@ -134,10 +150,10 @@ export default (isTest = false) => {
     ethereumRpcUrl: ETHEREUM_RPC_URL,
     polygonRpcUrl: POLYGON_RPC_URL,
     arbitrumRpcUrl: ARBITRUM_RPC_URL,
-    sonicRpcUrl: SONIC_RPC_URL,
     avalancheRpcUrl: AVALANCHE_RPC_URL,
     baseRpcUrl: BASE_RPC_URL,
     fraxtalRpcUrl: FRAXTAL_RPC_URL,
+    sonicRpcUrl: SONIC_RPC_URL,
     circleApiKeyMainnet: CIRCLE_API_KEY_MAINNET,
     circleEntitySecret: CIRCLE_ENTITY_SECRET,
     thirdwebSecretKey: THIRDWEB_SECRET_KEY,
@@ -153,5 +169,8 @@ export default (isTest = false) => {
     redisUsername: REDIS_USERNAME,
     binanceRpcUrl: BINANCE_RPC_URL,
     jwtSecret: JWT_SECRET,
+    searchEngineId: SEARCH_ENGINE_ID,
+    googleApiKey: GOOGLE_API_KEY,
+    nibiruRpcUrl: NIBIRU_RPC_URL
   };
 };

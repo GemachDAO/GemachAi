@@ -2,6 +2,60 @@
 
 Gemach AI is a powerful DeFi protocol interface that enables natural language interactions with various blockchain protocols. It simplifies complex DeFi operations by translating user intentions into executable on-chain actions.
 
+## Adding New Protocols
+
+To add a new protocol to the system, use the `add-protocol.sh` script:
+
+```bash
+$ ./scripts/add-protocol.sh <protocol_name> <description> <chain_ids> <actions>
+```
+
+Example:
+```bash
+$ ./scripts/add-protocol.sh 'myprotocol' 'My protocol description' '1,2,3' 'SWAP,BRIDGE'
+```
+
+Parameters:
+- `protocol_name`: The name of your protocol (e.g., 'myprotocol')
+- `description`: A description of what your protocol does
+- `chain_ids`: Comma-separated list of chain IDs your protocol supports (e.g., '1,2,3')
+- `actions`: Comma-separated list of actions your protocol supports
+
+Available actions:
+- BORROW
+- BRIDGE
+- CLAIM
+- CLOSE
+- DEPOSIT
+- LEND
+- LOCK
+- LONG
+- REPAY
+- SHORT
+- STAKE
+- SWAP
+- UNLOCK
+- UNSTAKE
+- VOTE
+- WITHDRAW
+- TRANSFER
+- FULL_REPAY
+- REMOVE_COLLATERAL
+- ADD_COLLATERAL
+- LEVERAGE
+- DELEVERAGE
+- OPEN
+
+The script will:
+1. Create a new protocol service file in `src/protocols/<protocol_name>/<protocol_name>.service.ts`
+2. Create a new protocol module file in `src/protocols/<protocol_name>/<protocol_name>.module.ts`
+3. Update the main protocols module to include the new protocol
+
+After running the script, you'll need to:
+1. Implement the required methods in your new protocol service
+2. Add any specific protocol logic and functionality
+3. Test your implementation
+
 ## Supported Protocols
 
 ### Stryke

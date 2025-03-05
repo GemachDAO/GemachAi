@@ -97,7 +97,7 @@ export class BaseChainService {
   public async getTransactionInfo({ txHash, chainId }: z.infer<typeof getTransactionInfoSchema>) {
     this.switchNetwork(chainId)
     const tx = await this.provider.getTransaction(txHash)
-    return txHash
+    return tx
   }
 
   isNativetoken(symbol: string) {
